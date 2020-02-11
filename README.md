@@ -1,4 +1,4 @@
-# Simple and Quick Note Taking System
+# Note: Simple and Quick Note Taking System
 
 ## Installation
 
