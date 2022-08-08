@@ -9,17 +9,16 @@ mkdir -p "$note_dir"
 
 # Search through titles.
 target=$(
-    find "$note_dir" \
-        | grep .md$ \
-        | sort -r \
-        | xargs -E '\n' -I {} grep '^# ' -H -n {} \
-        | sed 's/\(.*\)\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\).md:\([0-9]\{1,\}\):# \(.*\)/\2:\3 \4/' \
-        | fzf --no-sort -i
+    "$bin_dir/note_search_file.py" --root "$note_dir" --mode list \
+    | fzf --no-sort -i
 )
+# Split output of `fzf` into parts.
+IFS=" " read -r -a target_parts <<< "$target"
+number=${target_parts[0]}
 
-# Extract date and line number from match.
-date=$(echo $target | sed 's/\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\):\([0-9]\{1,\}\) \(.*\)/\1/')
-line=$(echo $target | sed 's/\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\):\([0-9]\{1,\}\) \(.*\)/\2/')
+# Extract path and line number from match.
+path=$("$bin_dir/note_search_file.py" --root "$note_dir" --mode path --choice $number)
+line=$("$bin_dir/note_search_file.py" --root "$note_dir" --mode line-number --choice $number)
 
 # Open vim at match.
-vim +$line -c 'execute "normal zR"' "$note_dir/$date.md"
+vim +$line -c 'execute "normal zR"' "$path"
